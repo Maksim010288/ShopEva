@@ -10,6 +10,7 @@ import java.util.List;
 @Repository
 public interface ProductRepository extends JpaRepository<ProductEntity, Integer> {
 
-     @Query(value = "select id, name, description from products p where p.name not regexp :sumbol", nativeQuery = true)
-    List<ProductEntity> findByNameRegexpNot(String sumbol);
+    @Query(value = "select * from products p where p.name not regexp :nameFilter limit :size offset :offset",
+            nativeQuery = true)
+    List<ProductEntity> findByNameRegexpNot(String nameFilter, int size, int offset);
 }

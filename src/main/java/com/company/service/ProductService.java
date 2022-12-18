@@ -1,7 +1,7 @@
 package com.company.service;
 
 import com.company.entity.ProductEntity;
-import com.company.model.ProductEntityModel;
+import com.company.model.ProductModel;
 import com.company.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,31 +13,27 @@ import java.util.stream.Collectors;
 public class ProductService {
 
     @Autowired
-    ProductRepository repository;
+    private ProductRepository repository;
 
-    public ProductEntity createProduct(ProductEntity entity) {
-        return repository.save(new ProductEntity(entity.getName(), entity.getDescription()));
+    public void createProduct(ProductEntity entity) {
+        repository.save(new ProductEntity(entity.getName(), entity.getDescription()));
     }
 
-    public List<ProductEntityModel> getAll(){
-        return repository.findAll().stream()
-                .map(productEntity -> new ProductEntityModel(productEntity.getName(), productEntity.getDescription()))
+    public List<ProductModel> getAll() {
+        return repository.findAll()
+                .stream()
+                .map(this::convert)
                 .collect(Collectors.toList());
     }
 
-    private List<ProductEntity> findProductByFilter(String nameFilter) {
-        List<ProductEntity> productEntities = null;
-        if (nameFilter.equalsIgnoreCase("Е") || nameFilter.equalsIgnoreCase("E")) {
-            productEntities = repository.findByNameRegexpNot("^" + nameFilter + ".*$");
-        } else if (nameFilter.equalsIgnoreCase("Eva")) {
-            productEntities = repository.findByNameRegexpNot("^.*[" + nameFilter + "].*$");
-        }
-        return productEntities;
+    public List<ProductModel> getProductByFilter(String nameFilter, int size, int offset) {
+        return repository.findByNameRegexpNot(nameFilter, size, offset)
+                .stream()
+                .map(this::convert)
+                .collect(Collectors.toList());
     }
 
-    public List<ProductEntityModel> getProductByFilter(String nameFilter) {
-        return findProductByFilter(nameFilter).stream()
-                .map(productEntity -> new ProductEntityModel(productEntity.getName(), productEntity.getDescription()))
-                .collect(Collectors.toList());
+    protected ProductModel convert(ProductEntity productEntity){
+        return new ProductModel(productEntity.getName(), productEntity.getDescription());
     }
 }
